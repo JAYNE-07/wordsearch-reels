@@ -188,6 +188,29 @@ export default function App() {
     const batchPalettes = shuffledPalettes();
     const title = themeTitle(kw);
 
+    // Build a SHARED, shuffled word deck for the whole batch so the same
+    // word (e.g. KETTLE) doesn't randomly land in two reels. We slice each
+    // reel's word pool off this deck so consecutive reels have disjoint
+    // sets until the pool is exhausted.
+    const fullPool = wordsForTheme(kw, 1e9, ((baseSeed + 0x9e3779b9) >>> 0) || 1);
+    const batchDeck: string[] = [];
+    {
+      let passSeed = (baseSeed >>> 0) || 1;
+      const totalNeeded = count * (WORDS_PER_REEL + 8);
+      while (batchDeck.length < Math.max(totalNeeded, fullPool.length)) {
+        const oneDeck = [...fullPool];
+        let s = passSeed;
+        const rng = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+        for (let i = oneDeck.length - 1; i > 0; i--) {
+          const j = Math.floor(rng() * (i + 1));
+          [oneDeck[i], oneDeck[j]] = [oneDeck[j], oneDeck[i]];
+        }
+        batchDeck.push(...oneDeck);
+        passSeed = ((passSeed * 16807) >>> 0) || 1;
+      }
+    }
+    let deckCursor = 0;
+
     let made = 0;
     let skipped = 0;
 
@@ -204,12 +227,22 @@ export default function App() {
       for (let attempt = 0; attempt < 4 && !scene; attempt++) {
         if (cancelRef.current) break;
         const seed = ((baseSeed + i * 131 + attempt * 977) >>> 0) || 1;
-        const wordPool = wordsForTheme(kw, WORDS_PER_REEL + 8, seed);
+        // Take the next slice off the shared deck. Retries advance the
+        // cursor too, so a failed attempt doesn't deal the same words.
+        const sliceSize = WORDS_PER_REEL + 8;
+        const wordPool: string[] = [];
+        const seen = new Set<string>();
+        for (let k = 0; k < sliceSize; k++) {
+          const w = batchDeck[(deckCursor + k) % batchDeck.length];
+          if (!seen.has(w)) { seen.add(w); wordPool.push(w); }
+        }
         const ws = placeWords(wordPool, COLS_FOR_REEL, COLS_FOR_REEL, seed);
         if (ws.placed.length >= WORDS_PER_REEL) {
           // Trim to first 14 actually-placed words.
           ws.placed = ws.placed.slice(0, WORDS_PER_REEL);
           ws.placements = ws.placements.slice(0, WORDS_PER_REEL);
+          // Advance the deck cursor only by the words actually consumed.
+          deckCursor = (deckCursor + WORDS_PER_REEL) % batchDeck.length;
           scene = buildScene(
             REEL_W,
             REEL_H,
@@ -222,6 +255,9 @@ export default function App() {
             REEL_SECONDS,
             seed,
           );
+        } else {
+          // Retry will draw a fresh slice further along the deck.
+          deckCursor = (deckCursor + sliceSize) % batchDeck.length;
         }
       }
       if (!scene) {
