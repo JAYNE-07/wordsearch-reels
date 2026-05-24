@@ -366,21 +366,17 @@ function drawWordList(
   t: number,
 ) {
   if (!words.length) return;
-  const cols = 2;
-  const rowsPerCol = Math.ceil(words.length / cols);
-  const sidePad = 80;
-  const colW = (width - sidePad * 2) / cols;
-  const lineH = 78;
+  const lineH = 82;
   const { sweepStart, sweepEnd } = REEL_TIMING;
   const span = sweepEnd - sweepStart;
   const per = words.length > 0 ? span / words.length : 0;
 
   const { stroke, shadow } = contrast(palette.text);
   ctx.save();
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font =
-    '800 60px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
+    '800 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
   ctx.lineWidth = 6;
   ctx.lineJoin = 'round';
   ctx.shadowColor = shadow;
@@ -388,13 +384,12 @@ function drawWordList(
 
   // Keep the entire block above the CTA region.
   const maxBottom = height - 360;
-  const actualLineH = Math.min(lineH, Math.max(48, (maxBottom - topY) / rowsPerCol));
+  const actualLineH = Math.min(lineH, Math.max(48, (maxBottom - topY) / words.length));
+  const cx = width / 2;
 
   for (let i = 0; i < words.length; i++) {
-    const colIdx = Math.floor(i / rowsPerCol);
-    const rowIdx = i % rowsPerCol;
-    const x = sidePad + colIdx * colW;
-    const y = topY + rowIdx * actualLineH + actualLineH / 2;
+    const x = cx;
+    const y = topY + i * actualLineH + actualLineH / 2;
 
     const wordRevealAt = sweepStart + per * (i + 0.5);
     const found = t >= wordRevealAt;
@@ -409,11 +404,11 @@ function drawWordList(
       const w = ctx.measureText(label).width;
       ctx.save();
       ctx.strokeStyle = palette.ctaBg;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.shadowBlur = 0;
       ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + w, y);
+      ctx.moveTo(x - w / 2, y);
+      ctx.lineTo(x + w / 2, y);
       ctx.stroke();
       ctx.restore();
     }
