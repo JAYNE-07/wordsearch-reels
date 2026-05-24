@@ -1501,6 +1501,10 @@ export function subjectFor(
  *  - Deduplicates and shuffles deterministically via `seed`.
  *  - If the pool is smaller than `n`, returns what's available.
  */
+/** Sorted list of every canonical keyword (165). Used by the UI keyword
+ *  pickers so users can browse without referring to the CSV. */
+export const CANONICAL_KEYWORDS: string[] = Object.keys(CATEGORIES).sort();
+
 export function wordsForTheme(
   theme: string,
   n: number,

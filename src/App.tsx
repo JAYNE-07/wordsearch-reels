@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { placeWords, wordsForTheme, themeTitle } from './lib/wordsearch';
+import { CANONICAL_KEYWORDS } from './lib/themes';
 import { PALETTES, type Palette } from './lib/palettes';
 import { buildScene, drawFrame, REEL_TIMING, type Scene } from './lib/animate';
 import { recordCanvas } from './lib/record';
@@ -359,8 +360,14 @@ export default function App() {
           <input
             value={keyword}
             placeholder="animals, fruits, space, ocean…"
+            list="keywords"
             onChange={(e) => setKeyword(e.target.value)}
           />
+          <datalist id="keywords">
+            {CANONICAL_KEYWORDS.map((k) => (
+              <option key={k} value={k} />
+            ))}
+          </datalist>
         </label>
         <p className="hint">
           165 keywords supported (same dictionary as the maze book).{' '}
