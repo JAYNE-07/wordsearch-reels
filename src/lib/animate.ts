@@ -375,15 +375,17 @@ function drawWordList(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  // Auto-shrink font so the longest word still fits its slot. With 4 words
-  // across a 1080-wide canvas, each slot is ~270px.
-  const sidePad = 24;
-  const slotW = (width - sidePad * 2) / words.length;
+  // Auto-shrink font so the full row + minimum gaps fit the canvas width.
+  const sidePad = 36;
+  const minGap = 28;
+  const availW = width - sidePad * 2;
   let fontSize = 56;
+  let widths: number[] = [];
   for (const fs of [56, 50, 44, 38, 32]) {
     ctx.font = `800 ${fs}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
-    const widest = Math.max(...words.map((w) => ctx.measureText(w).width));
-    if (widest <= slotW - 12) { fontSize = fs; break; }
+    widths = words.map((w) => ctx.measureText(w).width);
+    const totalW = widths.reduce((a, b) => a + b, 0) + minGap * (words.length - 1);
+    if (totalW <= availW) { fontSize = fs; break; }
     fontSize = fs;
   }
   ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
@@ -392,10 +394,19 @@ function drawWordList(
   ctx.shadowColor = shadow;
   ctx.shadowBlur = 8;
 
+  // Equal gap between consecutive words: total leftover space, evenly split.
+  const totalWordWidth = widths.reduce((a, b) => a + b, 0);
+  const gap =
+    words.length > 1
+      ? Math.max(minGap, (availW - totalWordWidth) / (words.length - 1))
+      : 0;
+
   const y = topY + Math.max(36, height * 0.018);
   void height;
+  let cursor = sidePad;
   for (let i = 0; i < words.length; i++) {
-    const x = sidePad + slotW * (i + 0.5);
+    const x = cursor + widths[i] / 2;
+    cursor += widths[i] + gap;
 
     const wordRevealAt = sweepStart + per * (i + 0.5);
     const found = t >= wordRevealAt;
