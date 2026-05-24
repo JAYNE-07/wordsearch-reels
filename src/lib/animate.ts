@@ -366,7 +366,6 @@ function drawWordList(
   t: number,
 ) {
   if (!words.length) return;
-  const lineH = 82;
   const { sweepStart, sweepEnd } = REEL_TIMING;
   const span = sweepEnd - sweepStart;
   const per = words.length > 0 ? span / words.length : 0;
@@ -375,21 +374,28 @@ function drawWordList(
   ctx.save();
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font =
-    '800 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
-  ctx.lineWidth = 6;
+
+  // Auto-shrink font so the longest word still fits its slot. With 4 words
+  // across a 1080-wide canvas, each slot is ~270px.
+  const sidePad = 24;
+  const slotW = (width - sidePad * 2) / words.length;
+  let fontSize = 56;
+  for (const fs of [56, 50, 44, 38, 32]) {
+    ctx.font = `800 ${fs}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
+    const widest = Math.max(...words.map((w) => ctx.measureText(w).width));
+    if (widest <= slotW - 12) { fontSize = fs; break; }
+    fontSize = fs;
+  }
+  ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
+  ctx.lineWidth = 5;
   ctx.lineJoin = 'round';
   ctx.shadowColor = shadow;
   ctx.shadowBlur = 8;
 
-  // Keep the entire block above the CTA region.
-  const maxBottom = height - 360;
-  const actualLineH = Math.min(lineH, Math.max(48, (maxBottom - topY) / words.length));
-  const cx = width / 2;
-
+  const y = topY + Math.max(36, height * 0.018);
+  void height;
   for (let i = 0; i < words.length; i++) {
-    const x = cx;
-    const y = topY + i * actualLineH + actualLineH / 2;
+    const x = sidePad + slotW * (i + 0.5);
 
     const wordRevealAt = sweepStart + per * (i + 0.5);
     const found = t >= wordRevealAt;
