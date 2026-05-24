@@ -21,7 +21,22 @@ const REEL_FPS = 30;
 const COLS_FOR_REEL = 9;  // small grid + 4 words = viewers can actually scan it in 5 s
 const WORDS_PER_REEL = 4; // fewer words = lower barrier, viewers more likely to try
 
-const BANNER = 'Can you find these words?';
+// Rotating banner pool — picked per reel so a batch of 5 doesn't all read
+// the same. Each line is short enough to render on one row of the banner.
+const BANNER_HOOKS = [
+  'Can you find these words?',
+  'Spot all 4 in 5 seconds?',
+  '4 words hidden — go!',
+  'Find them before the timer?',
+  'How fast can you spot all 4?',
+  'Quick — can you see them?',
+  'Beat the clock: find all 4',
+  'Find all the words?',
+  'Only sharp eyes can spot these',
+  'Race the countdown',
+  'Hidden words — can you see?',
+  'Find all 4 before time runs out',
+];
 
 // Word-search themed CTA pool.
 const RANDOM_CTAS = [
@@ -181,6 +196,7 @@ export default function App() {
 
       const palette = batchPalettes[i % batchPalettes.length];
       const reelCta = cta.trim() || RANDOM_CTAS[Math.floor(Math.random() * RANDOM_CTAS.length)];
+      const reelBanner = BANNER_HOOKS[Math.floor(Math.random() * BANNER_HOOKS.length)];
 
       setProgress(`Reel ${i + 1} of ${count} — building puzzle…`);
       let scene: Scene | null = null;
@@ -199,7 +215,7 @@ export default function App() {
             REEL_H,
             ws,
             palette,
-            BANNER,
+            reelBanner,
             title,
             reelCta,
             handle,
