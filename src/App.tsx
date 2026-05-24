@@ -16,8 +16,8 @@ const MUSIC_TIMING: MusicTiming = {
   ctaAt: REEL_TIMING.ctaStart,
 };
 const REEL_FPS = 30;
-const COLS_FOR_REEL = 18;
-const WORDS_PER_REEL = 14;
+const COLS_FOR_REEL = 12; // smaller grid pairs nicely with 5 words and stays readable on phones
+const WORDS_PER_REEL = 5;  // fewer words = lower barrier, viewers more likely to try
 
 const BANNER = 'Can you find these words?';
 
@@ -177,7 +177,7 @@ export default function App() {
         const seed = ((baseSeed + i * 131 + attempt * 977) >>> 0) || 1;
         const wordPool = wordsForTheme(kw, WORDS_PER_REEL + 8, seed);
         const ws = placeWords(wordPool, COLS_FOR_REEL, COLS_FOR_REEL, seed);
-        if (ws.placed.length >= Math.min(WORDS_PER_REEL, 8)) {
+        if (ws.placed.length >= WORDS_PER_REEL) {
           // Trim to first 14 actually-placed words.
           ws.placed = ws.placed.slice(0, WORDS_PER_REEL);
           ws.placements = ws.placements.slice(0, WORDS_PER_REEL);
@@ -269,7 +269,7 @@ export default function App() {
       <header>
         <h1>Word Search Reels Generator</h1>
         <p className="sub">
-          9:16 reels for Instagram — themed 18×18 word search, ~5 s for viewers
+          9:16 reels for Instagram — themed 12×12 word search with 5 words, ~5 s for viewers
           to scan, then capsule highlights sweep every word. All reels generate
           first, then you pick which to save.
         </p>
