@@ -357,17 +357,17 @@ export default function App() {
       <div className="panel">
         <label className="row">
           <span>Theme keyword</span>
-          <input
+          <select
+            className="keyword-select"
             value={keyword}
-            placeholder="animals, fruits, space, ocean…"
-            list="keywords"
             onChange={(e) => setKeyword(e.target.value)}
-          />
-          <datalist id="keywords">
+          >
             {CANONICAL_KEYWORDS.map((k) => (
-              <option key={k} value={k} />
+              <option key={k} value={k}>
+                {k}
+              </option>
             ))}
-          </datalist>
+          </select>
         </label>
         <p className="hint">
           165 keywords supported (same dictionary as the maze book).{' '}
