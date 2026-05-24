@@ -10,6 +10,8 @@ const REEL_H = 1920;
 const REEL_SECONDS = REEL_TIMING.duration;
 const MUSIC_TIMING: MusicTiming = {
   titlePopAt: REEL_TIMING.titleStart,
+  // Anxious clock-tick bed only starts when the puzzle grid appears, not at t=0.
+  bedStart: REEL_TIMING.gridFadeIn,
   countdownStart: REEL_TIMING.countdownStart,
   walkStart: REEL_TIMING.sweepStart,
   walkEnd: REEL_TIMING.sweepEnd,

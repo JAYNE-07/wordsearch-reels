@@ -22,7 +22,7 @@ export interface Scene {
 
 /** Single source of truth for the reel timeline. */
 export const REEL_TIMING = {
-  duration: 12,
+  duration: 14,
   bannerStart: 0,
   titleStart: 0.5,
   gridFadeIn: 1.5,
