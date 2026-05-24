@@ -188,10 +188,11 @@ export default function App() {
     const batchPalettes = shuffledPalettes();
     const title = themeTitle(kw);
 
-    // Build a SHARED, shuffled word deck for the whole batch so the same
-    // word (e.g. KETTLE) doesn't randomly land in two reels. We slice each
-    // reel's word pool off this deck so consecutive reels have disjoint
-    // sets until the pool is exhausted.
+    // Build a shuffled deck of the full theme pool and track which words
+    // have been ACTUALLY placed across the batch so far. Each new reel
+    // skips any word already used in an earlier reel — guarantees no
+    // repeats until the pool is genuinely exhausted, at which point we
+    // clear the set and start a fresh cycle.
     const fullPool = wordsForTheme(kw, 1e9, ((baseSeed + 0x9e3779b9) >>> 0) || 1);
     const batchDeck: string[] = [];
     {
@@ -210,6 +211,7 @@ export default function App() {
       }
     }
     let deckCursor = 0;
+    const usedWords = new Set<string>();
 
     let made = 0;
     let skipped = 0;
@@ -227,22 +229,34 @@ export default function App() {
       for (let attempt = 0; attempt < 4 && !scene; attempt++) {
         if (cancelRef.current) break;
         const seed = ((baseSeed + i * 131 + attempt * 977) >>> 0) || 1;
-        // Take the next slice off the shared deck. Retries advance the
-        // cursor too, so a failed attempt doesn't deal the same words.
+        // Fill the word pool by walking the deck and skipping anything
+        // already used in an earlier reel of this batch.
         const sliceSize = WORDS_PER_REEL + 8;
         const wordPool: string[] = [];
         const seen = new Set<string>();
-        for (let k = 0; k < sliceSize; k++) {
-          const w = batchDeck[(deckCursor + k) % batchDeck.length];
-          if (!seen.has(w)) { seen.add(w); wordPool.push(w); }
+        let walked = 0;
+        while (wordPool.length < sliceSize && walked < batchDeck.length * 2) {
+          const w = batchDeck[(deckCursor + walked) % batchDeck.length];
+          walked++;
+          if (usedWords.has(w) || seen.has(w)) continue;
+          seen.add(w);
+          wordPool.push(w);
+        }
+        // Fully exhausted the pool? Clear the used-set so the next reel
+        // can start a fresh cycle instead of failing forever.
+        if (wordPool.length < WORDS_PER_REEL) {
+          usedWords.clear();
+          continue;
         }
         const ws = placeWords(wordPool, COLS_FOR_REEL, COLS_FOR_REEL, seed);
         if (ws.placed.length >= WORDS_PER_REEL) {
-          // Trim to first 14 actually-placed words.
           ws.placed = ws.placed.slice(0, WORDS_PER_REEL);
           ws.placements = ws.placements.slice(0, WORDS_PER_REEL);
-          // Advance the deck cursor only by the words actually consumed.
-          deckCursor = (deckCursor + WORDS_PER_REEL) % batchDeck.length;
+          // Mark THIS reel's placed words used so no later reel picks them.
+          for (const w of ws.placed) usedWords.add(w);
+          // Advance the cursor past the words we walked through so the
+          // next reel starts in fresh territory.
+          deckCursor = (deckCursor + walked) % batchDeck.length;
           scene = buildScene(
             REEL_W,
             REEL_H,
@@ -256,8 +270,7 @@ export default function App() {
             seed,
           );
         } else {
-          // Retry will draw a fresh slice further along the deck.
-          deckCursor = (deckCursor + sliceSize) % batchDeck.length;
+          deckCursor = (deckCursor + walked) % batchDeck.length;
         }
       }
       if (!scene) {
