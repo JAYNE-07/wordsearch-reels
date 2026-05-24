@@ -446,16 +446,24 @@ function drawBanner(
   const { stroke, shadow } = contrast(palette.ctaBg);
   ctx.fillStyle = palette.ctaBg;
   ctx.strokeStyle = stroke;
-  ctx.lineWidth = 14;
   ctx.lineJoin = 'round';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font =
-    '900 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
   ctx.shadowColor = shadow;
   ctx.shadowBlur = 18;
   ctx.shadowOffsetY = 8;
   const single = text.toUpperCase();
+  // Auto-shrink so the banner fits the canvas with ~32 px side padding.
+  const maxW = cx * 2 - 64;
+  let fontSize = 64;
+  for (const fs of [64, 58, 52, 46, 40, 36]) {
+    ctx.font = `900 ${fs}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
+    if (ctx.measureText(single).width <= maxW) { fontSize = fs; break; }
+    fontSize = fs;
+  }
+  ctx.font = `900 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif`;
+  // Scale the outline with font size so the stroke stays proportionate.
+  ctx.lineWidth = Math.max(8, Math.round(fontSize * 0.2));
   ctx.strokeText(single, cx, cy);
   ctx.fillText(single, cx, cy);
   ctx.restore();
