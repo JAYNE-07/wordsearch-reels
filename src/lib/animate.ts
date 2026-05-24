@@ -131,13 +131,11 @@ export function drawFrame(
     drawBanner(ctx, banner, width / 2, 130, bannerP, palette);
   }
 
-  // 2) theme title — fades in at titleStart, fades out before countdown.
-  const titleP = clamp01((t - titleStart) / 0.7);
-  if (titleP > 0) {
-    const fadeOut = clamp01(1 - (t - (countdownStart - 0.6)) / 0.4);
-    const bob = t > 2 && t < countdownStart - 0.6 ? Math.sin((t - 2) * 2.4) * 6 : 0;
-    drawTitle(ctx, title, width / 2, 260 + bob, titleP * fadeOut, palette);
-  }
+  // 2) theme title intentionally omitted — the banner alone carries the
+  // intro; the category label (e.g. "ANIMALS") was redundant and the user
+  // wants a cleaner top area.
+  void titleStart;
+  void title;
 
   // 3) grid fade-in
   const gridP = clamp01((t - gridFadeIn) / 0.6);
@@ -460,34 +458,6 @@ function drawBanner(
   const single = text.toUpperCase();
   ctx.strokeText(single, cx, cy);
   ctx.fillText(single, cx, cy);
-  ctx.restore();
-}
-
-function drawTitle(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  cx: number,
-  cy: number,
-  p: number,
-  palette: Palette,
-) {
-  ctx.save();
-  ctx.globalAlpha = p;
-  const slide = (1 - p) * -24;
-  const { stroke, shadow } = contrast(palette.text);
-  ctx.fillStyle = palette.text;
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = 12;
-  ctx.lineJoin = 'round';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font =
-    '900 96px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
-  ctx.shadowColor = shadow;
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 6;
-  ctx.strokeText(text, cx, cy + slide);
-  ctx.fillText(text, cx, cy + slide);
   ctx.restore();
 }
 
