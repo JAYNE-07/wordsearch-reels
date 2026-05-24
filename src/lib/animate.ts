@@ -370,7 +370,7 @@ function drawWordList(
   const rowsPerCol = Math.ceil(words.length / cols);
   const sidePad = 80;
   const colW = (width - sidePad * 2) / cols;
-  const lineH = 44;
+  const lineH = 78;
   const { sweepStart, sweepEnd } = REEL_TIMING;
   const span = sweepEnd - sweepStart;
   const per = words.length > 0 ? span / words.length : 0;
@@ -380,15 +380,15 @@ function drawWordList(
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.font =
-    '700 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
-  ctx.lineWidth = 4;
+    '800 60px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
+  ctx.lineWidth = 6;
   ctx.lineJoin = 'round';
   ctx.shadowColor = shadow;
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 8;
 
   // Keep the entire block above the CTA region.
   const maxBottom = height - 360;
-  const actualLineH = Math.min(lineH, Math.max(28, (maxBottom - topY) / rowsPerCol));
+  const actualLineH = Math.min(lineH, Math.max(48, (maxBottom - topY) / rowsPerCol));
 
   for (let i = 0; i < words.length; i++) {
     const colIdx = Math.floor(i / rowsPerCol);
@@ -505,12 +505,14 @@ function drawCountdown(
     scale = 1 + k * 0.4;
   }
 
+  // Sit the countdown in the title's old space (above the grid). The title
+  // has fully faded out by countdownStart, so this area is empty.
   const cx = width / 2;
-  const cy = 960;
+  const cy = 280;
 
   ctx.save();
   ctx.globalAlpha = alpha * 0.85;
-  const ringR = 220 * scale;
+  const ringR = 150 * scale;
   const ring = ctx.createRadialGradient(cx, cy, ringR * 0.15, cx, cy, ringR);
   ring.addColorStop(0, palette.ctaBg);
   ring.addColorStop(0.6, palette.ctaBg + '00');
@@ -533,10 +535,10 @@ function drawCountdown(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font =
-    '900 320px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
+    '900 220px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif';
   ctx.shadowColor = 'rgba(0,0,0,0.65)';
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 10;
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 8;
   ctx.strokeText(String(digit), cx, cy);
   ctx.fillText(String(digit), cx, cy);
   ctx.restore();
