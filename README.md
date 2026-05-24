@@ -1,10 +1,10 @@
 # Word Search Reels Generator
 
-Produces 9:16 Instagram reels promoting word-search puzzle books. Each 12 s
-reel: themed 18×18 grid fades in with a two-column word list, viewers get
-~5 s of think time, a big 3-2-1 countdown plays, capsule highlights sweep
-every word, and a CTA card pops in. Every reel uses a different brand
-palette.
+Produces 9:16 Instagram reels promoting the [word-search book](https://jayne-07.github.io/wordsearch-generator/).
+Each 12 s reel: themed 12×12 grid fades in with 4 words on a single row, viewers
+get ~5 s of think time, a big 3-2-1 countdown plays above the grid, capsule
+highlights sweep every word, and a CTA card pops in. Every reel uses a different
+brand palette.
 
 **Live site:** https://jayne-07.github.io/wordsearch-reels/
 
@@ -20,7 +20,7 @@ npm run dev
 - A small inline theme dictionary covers ~14 keywords (animals, fruits,
   vegetables, countries, space, ocean, sports, colors, instruments,
   weather, flowers, gemstones, trees, cars) plus a generic fallback.
-- `placeWords()` carves 14 words into an 18×18 grid in four directions
+- `placeWords()` carves 4 words into a 12×12 grid in four directions
   (→ ↓ ↘ ↗), filling empty cells with random uppercase letters.
 - Canvas renders 1080×1920 frames at 30 fps; `MediaRecorder` captures the
   stream to MP4 (or WebM where MP4 isn't supported).
