@@ -127,6 +127,7 @@ const THEMES: Record<string, string[]> = {
     'AVOCADO', 'DURIAN',
   ],
   vegetables: [
+    /* legacy inline pool — superseded by the 165-keyword themes.ts dict */
     'CARROT', 'POTATO', 'TOMATO', 'ONION', 'GARLIC', 'PEPPER', 'CELERY',
     'LETTUCE', 'SPINACH', 'BROCCOLI', 'CABBAGE', 'CUCUMBER', 'PUMPKIN',
     'RADISH', 'TURNIP', 'BEET', 'CORN', 'PEAS', 'BEAN', 'KALE',
@@ -231,22 +232,18 @@ const THEMES: Record<string, string[]> = {
 };
 
 /** Pick `n` words from the theme matching `theme` (case-insensitive),
- *  deterministically shuffled by `seed`. Unknown themes fall back to general. */
+ *  deterministically shuffled by `seed`. Uses the same 165-keyword themes
+ *  dictionary as the wordsearch-generator/maze-generator. */
+import { wordsForTheme as themesWordsForTheme, resolveCategory } from './themes';
 export function wordsForTheme(theme: string, n: number, seed: number): string[] {
-  const key = theme.trim().toLowerCase();
-  const pool = THEMES[key] ?? THEMES.general;
-  const rng = mulberry32(seed);
-  const out = [...pool];
-  // Fisher–Yates
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out.slice(0, n);
+  // Re-use the generator's full dictionary. Length cap kept tight enough
+  // for the small reel grid.
+  return themesWordsForTheme(theme, n, seed, 10, 3);
 }
 
 /** Convenience: theme display name uppercased, used as title. */
 export function themeTitle(theme: string): string {
   const key = theme.trim().toLowerCase();
-  return (THEMES[key] ? key : 'general').toUpperCase();
+  const cat = resolveCategory(key);
+  return (cat ?? key).toUpperCase();
 }

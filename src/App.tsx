@@ -362,6 +362,13 @@ export default function App() {
             onChange={(e) => setKeyword(e.target.value)}
           />
         </label>
+        <p className="hint">
+          165 keywords supported (same dictionary as the maze book).{' '}
+          <a href="./keywords.csv" download>
+            Download the full keyword list (CSV)
+          </a>
+          .
+        </p>
         <label className="row">
           <span>How many reels</span>
           <input
