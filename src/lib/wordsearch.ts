@@ -109,8 +109,11 @@ export function placeWords(
 }
 
 // ------- themed word pools -------
+// Legacy: the original inline 14-theme dictionary is kept as a fallback in
+// case themes.ts is missing the keyword (resolveCategory returns null).
+// In practice themes.ts has 165 keywords so this rarely triggers.
 
-const THEMES: Record<string, string[]> = {
+const _LEGACY_THEMES: Record<string, string[]> = {
   animals: [
     'LION', 'TIGER', 'BEAR', 'WOLF', 'FOX', 'DEER', 'ELEPHANT', 'GIRAFFE',
     'ZEBRA', 'MONKEY', 'PANDA', 'KOALA', 'RABBIT', 'SQUIRREL', 'HORSE',
@@ -236,9 +239,20 @@ const THEMES: Record<string, string[]> = {
  *  dictionary as the wordsearch-generator/maze-generator. */
 import { wordsForTheme as themesWordsForTheme, resolveCategory } from './themes';
 export function wordsForTheme(theme: string, n: number, seed: number): string[] {
-  // Re-use the generator's full dictionary. Length cap kept tight enough
-  // for the small reel grid.
-  return themesWordsForTheme(theme, n, seed, 10, 3);
+  // Use the generator's full dictionary. Length cap kept tight enough
+  // for the small reel grid. Fall back to the legacy inline pools only
+  // if the dictionary returned nothing usable.
+  const fromGenerator = themesWordsForTheme(theme, n, seed, 10, 3);
+  if (fromGenerator.length > 0) return fromGenerator;
+  const key = theme.trim().toLowerCase();
+  const legacy = _LEGACY_THEMES[key] ?? _LEGACY_THEMES.general;
+  const rng = mulberry32(seed);
+  const out = [...legacy];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out.slice(0, n);
 }
 
 /** Convenience: theme display name uppercased, used as title. */
