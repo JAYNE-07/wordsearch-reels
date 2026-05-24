@@ -134,6 +134,17 @@ export default function App() {
     }
   };
 
+  const downloadSelectedAsZip = async () => {
+    const chosen = reels.filter((r) => r.selected);
+    if (!chosen.length) return;
+    const { default: JSZip } = await import('jszip');
+    const zip = new JSZip();
+    for (const r of chosen) zip.file(r.filename, r.blob);
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadBlob(blob, `wordsearch-reels-${slugify(keyword)}-${stamp}.zip`);
+  };
+
   const generate = useCallback(async () => {
     const kw = keyword.trim();
     if (!kw || status === 'working') return;
@@ -381,11 +392,17 @@ export default function App() {
                 Select none
               </button>
               <button
-                className="primary"
                 disabled={selectedCount === 0}
                 onClick={downloadSelected}
               >
-                Download {selectedCount}
+                Download {selectedCount} files
+              </button>
+              <button
+                className="primary"
+                disabled={selectedCount === 0}
+                onClick={downloadSelectedAsZip}
+              >
+                Download as .zip
               </button>
             </div>
           </div>
