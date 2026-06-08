@@ -3225,6 +3225,7 @@ export const PRIMARY_KEYWORDS: ReadonlyArray<{ label: string; key: string }> = [
   { label: 'nature',      key: 'nature' },
   { label: 'space',       key: 'space' },
   { label: 'sports',      key: 'sports' },
+  { label: 'symbols',     key: 'symbols' },
   { label: 'vehicles',    key: 'vehicles' },
 ];
 
